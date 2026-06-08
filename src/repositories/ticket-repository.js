@@ -6,6 +6,17 @@ class TicketRepository extends CrudRepository{
     {
         super(Ticket)
     }
+
+    async getPendingEmails()
+    {
+        const response = await Ticket.findAll({
+            where : {
+                status : "PENDING"
+            }
+        })
+
+        return response ;
+    }
 }
 
 module.exports = TicketRepository ;
