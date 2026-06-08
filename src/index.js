@@ -15,23 +15,23 @@ app.use("/api", apiRoutes)
 app.listen(ServerConfig.PORT , async () => {
     console.log(`The server is running on the PORT: ${ServerConfig.PORT}`) ;
 
-    try {
+    // try {
 
-    const info = await mailSender.sendMail({
-        from : ServerConfig.GMAIL_ADD,
-        to : "aashish.kumar@mobcoder.com",
-        subject : "testing nodemailer",
-        text : "Hello world",
-        html : "<h1> Html content </h1>"
+    // const info = await mailSender.sendMail({
+    //     from : ServerConfig.GMAIL_ADD,
+    //     to : "aashish.kumar@mobcoder.com",
+    //     subject : "testing nodemailer",
+    //     text : "Hello world",
+    //     html : "<h1> Html content </h1>"
 
-    })
+    // })
    
-    console.log("Info after sending the email", info)
+    // console.log("Info after sending the email", info)
         
-    } catch (error) {
-        console.log("error while sending the email", error)
+    // } catch (error) {
+    //     console.log("error while sending the email", error)
         
-    }
+    // }
 
 })
 
