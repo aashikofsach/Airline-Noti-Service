@@ -1,37 +1,58 @@
-const {PORT} = require("./config");
-const express = require('express');
-const apiRoutes = require("./routes")
-const {ServerConfig , logger , mailSender} = require("./config");
+const { PORT } = require("./config");
+const express = require("express");
+const amqplib = require("amqplib");
 
+async function queueConnection() {
+  try {
+    const connection = await amqplib.connect("amqp://localhost");
+    const channel = await connection.createChannel();
 
-const app = express() ;
+    await channel.assertQueue("noti-queue");
+    // setInterval(() => {
+    //              channel.sendToQueue("noti-queue", Buffer.from("Something to do "))
+
+    // }, 1000);
+
+    await channel.consume("noti-queue", (data) => {
+      console.log(` hi ${Buffer.from(data.content)}`);
+      channel.ack(data);
+    });
+  } catch (error) {
+    console.log(
+      "errror during connection to rabbit MQ from notification service",
+      error,
+    );
+  }
+}
+
+const apiRoutes = require("./routes");
+const { ServerConfig, logger, mailSender } = require("./config");
+
+const app = express();
 app.use(express.json());
-app.use(express.urlencoded({extended : true}));
+app.use(express.urlencoded({ extended: true }));
 
-app.use("/api", apiRoutes)
+app.use("/api", apiRoutes);
 
+app.listen(ServerConfig.PORT, async () => {
+  console.log(`The server is running on the PORT: ${ServerConfig.PORT}`);
+  queueConnection();
 
+  // try {
 
-app.listen(ServerConfig.PORT , async () => {
-    console.log(`The server is running on the PORT: ${ServerConfig.PORT}`) ;
+  // const info = await mailSender.sendMail({
+  //     from : ServerConfig.GMAIL_ADD,
+  //     to : "aashish.kumar@mobcoder.com",
+  //     subject : "testing nodemailer",
+  //     text : "Hello world",
+  //     html : "<h1> Html content </h1>"
 
-    // try {
+  // })
 
-    // const info = await mailSender.sendMail({
-    //     from : ServerConfig.GMAIL_ADD,
-    //     to : "aashish.kumar@mobcoder.com",
-    //     subject : "testing nodemailer",
-    //     text : "Hello world",
-    //     html : "<h1> Html content </h1>"
+  // console.log("Info after sending the email", info)
 
-    // })
-   
-    // console.log("Info after sending the email", info)
-        
-    // } catch (error) {
-    //     console.log("error while sending the email", error)
-        
-    // }
+  // } catch (error) {
+  //     console.log("error while sending the email", error)
 
-})
-
+  // }
+});
