@@ -1,6 +1,7 @@
 const { PORT } = require("./config");
 const express = require("express");
 const amqplib = require("amqplib");
+const {EmailService} = require("./services/")
 
 async function queueConnection() {
   try {
@@ -15,6 +16,10 @@ async function queueConnection() {
 
     await channel.consume("noti-queue", (data) => {
       console.log(` hi ${Buffer.from(data.content)}`);
+      const object = JSON.parse(Buffer.from(data.content));
+
+      EmailService.sendEmail(ServerConfig.GMAIL_ADD , object.recepientEmail , object.subject , object.text)
+
       channel.ack(data);
     });
   } catch (error) {
